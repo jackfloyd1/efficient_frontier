@@ -1,0 +1,43 @@
+import yfinance as yf
+import pandas as pd
+
+# Gather user input for criteria
+min_assets = float(input("Enter minimum AUM (in million USD): ")) * 1000000
+min_rating = float(input("Enter minimum Morningstar rating: "))
+max_expense_ratio = float(input("Enter maximum expense ratio (in decimal form): "))
+
+# Define your list of mutual fund symbols
+mutual_fund_symbols = ['UMPIX', 'KNPAX', 'SSSIX', 'CVVRX']  # Replace with your list of mutual fund symbols
+
+# Initialize an empty list to store data dictionaries
+data_list = []
+
+# Loop through each mutual fund
+for symbol in mutual_fund_symbols:
+    fund = yf.Ticker(symbol)
+    
+    # Get fund information
+    info = fund.info
+    name = info['shortName']
+    aum = info.get('totalAssets')
+    rating = info.get('morningStarOverallRating')
+    expense_ratio = info.get('annualReportExpenseRatio')
+
+    # Filter based on user-defined criteria
+    if aum is not None and aum >= min_assets and \
+       rating is not None and rating >= min_rating and \
+       expense_ratio is not None and expense_ratio <= max_expense_ratio:
+        data_list.append({'Symbol': symbol,
+                          'Name': name,
+                          'AUM': aum,
+                          'Rating': rating,
+                          'Expense Ratio': expense_ratio})
+
+# Create a DataFrame from the list of data dictionaries
+filtered_funds = pd.DataFrame(data_list)
+
+# Sort the funds by AUM in descending order
+filtered_funds = filtered_funds.sort_values(by='AUM', ascending=False)
+
+# Display the filtered funds
+print(filtered_funds)
